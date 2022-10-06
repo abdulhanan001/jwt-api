@@ -13,7 +13,6 @@ class UsersController < ApplicationController
 
   def login
     @user = User.find_by(username: user_params['username'])
-
     if @user && @user&.authenticate(user_params['password'])
       generate_token
     else
@@ -24,12 +23,13 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:username, :password)
+    params.permit(:username, :password)
   end
 
   def generate_token
-    token  = encode_token({ user_id: @user.id })
-    render json: { toke: token, user: @user }, status: :ok
+    token = encode_token({ user_id: @user.id })
+    cookies['AUTH-TOKEN'] = token
+    render json: { user: @user }, status: :ok
   end
 
   def return_unprocessable_entity
